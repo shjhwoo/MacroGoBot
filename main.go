@@ -2,44 +2,58 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os/exec"
 	"time"
 
 	"github.com/go-vgo/robotgo"
 )
 
-var exePath = "C:\\Users\\samsung\\Desktop\\vegas_starfruit\\Vegas.exe" //"C:\\Users\\samsung\\Desktop\\Starfruit_update\\Starfruit.exe"
+var exePath = "C:\\Users\\samsung\\Desktop\\Starfruit_update\\Starfruit.exe"
 
 func main() {
 
-	fmt.Printf("🚀 프로그램 실행 중... [%s]\n", exePath)
+	fmt.Println("🚀 프로그램 실행 중...")
 
-	// 2. 프로그램 실행 (비동기 실행)
-	cmd := exec.Command("powershell", "/c", "start", "-verb", "runas", exePath)
+	exec.Command("powershell", "/c", "start", "-verb", "runas", exePath).Start()
 
-	err := cmd.Start()
-	if err != nil {
-		log.Fatalf("프로그램 실행 실패: %v", err)
-	}
+	fmt.Println("⏳ 프로그램 로딩 대기 중 (5초)...")
+	time.Sleep(5 * time.Second)
 
-	// 3. 프로그램이 켜질 때까지 충분히 기다림 (컴퓨터 속도에 따라 조절)
-	fmt.Println("⏳ 로딩 대기 중 (3초)...")
-	time.Sleep(3 * time.Second)
-
-	// 4. 아까 구한 좌표로 마우스 이동 및 클릭!
-	targetX, targetY := 1492, 542 // 방금 구하신 좌표!
-
-	fmt.Printf("🎯 좌표(%d, %d)로 이동하여 클릭합니다.\n", targetX, targetY)
-
-	// 마우스 이동
-	robotgo.Move(targetX, targetY)
-
-	// 확실하게 하기 위해 잠깐 멈췄다가 클릭
-	time.Sleep(500 * time.Millisecond)
-	robotgo.Click("left") // 왼쪽 클릭
-
-	fmt.Println("✅ 매크로 동작 완료!")
+	Login()
 
 	select {}
+}
+
+func Login() {
+	// 2. 포커스 잡기 (화면 중앙 아무데나 한번 클릭)
+	// 창이 떴는데 포커스가 다른데 가 있을 수 있으므로 안전장치
+	robotgo.MoveClick(960, 540)
+	time.Sleep(1 * time.Second)
+
+	// 3. [핵심] 탭 키로 이동 (직접 세어본 횟수만큼 반복)
+	// 예: 아이디 창까지 탭 3번이 필요하다면
+	fmt.Println("🎹 입력창 찾아가는 중...")
+
+	robotgo.KeyTap("tab")
+	time.Sleep(500 * time.Millisecond)
+
+	robotgo.KeyTap("tab")
+	time.Sleep(500 * time.Millisecond)
+
+	robotgo.KeyTap("tab")
+	time.Sleep(500 * time.Millisecond)
+
+	// 4. 입력 및 로그인
+	fmt.Println("✍️ 아이디/비번 입력")
+	robotgo.Type("shjhwoo@trustnhope.com")
+
+	robotgo.KeyTap("tab") // 비번창으로 이동
+	time.Sleep(500 * time.Millisecond)
+
+	robotgo.Type("Qwe123!@#") // 비번 입력
+	time.Sleep(500 * time.Millisecond)
+
+	robotgo.KeyTap("enter") // 엔터 쳐서 로그인!
+
+	fmt.Println("✅ 로그인 시도 완료")
 }
